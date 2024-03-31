@@ -1,0 +1,10 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+spring:
+  data:
+    mongodb:
+      user: szerszu
+      password: szerszu
+      uri: mongodb://localhost:27017/scans
