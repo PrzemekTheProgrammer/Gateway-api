@@ -1,4 +1,4 @@
-package pl.com.coders.gateway.configuration;
+package pl.com.pszerszenowicz.gateway.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

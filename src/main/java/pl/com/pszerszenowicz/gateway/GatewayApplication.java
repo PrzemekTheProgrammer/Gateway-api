@@ -1,4 +1,4 @@
-package pl.com.coders.gateway;
+package pl.com.pszerszenowicz.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
