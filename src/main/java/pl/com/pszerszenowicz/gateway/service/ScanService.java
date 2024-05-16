@@ -1,8 +1,5 @@
 package pl.com.pszerszenowicz.gateway.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -18,9 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 import pl.com.pszerszenowicz.gateway.configuration.KafkaConfig;
 import pl.com.pszerszenowicz.gateway.configuration.RabbitMQConfig;
+import pl.com.pszerszenowicz.gateway.model.dto.ReceivedScan;
 import pl.com.pszerszenowicz.model.ProductInfo;
 import pl.com.pszerszenowicz.model.VerificationStatus;
-import pl.com.pszerszenowicz.gateway.model.dto.ReceivedScan;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;

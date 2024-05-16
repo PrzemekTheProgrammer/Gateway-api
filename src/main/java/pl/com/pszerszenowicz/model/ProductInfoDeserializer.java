@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Deserializer;
 
-import java.nio.charset.StandardCharsets;
-
 @Slf4j
 public class ProductInfoDeserializer implements Deserializer<ProductInfo> {
     private final ObjectMapper objectMapper = new ObjectMapper();
