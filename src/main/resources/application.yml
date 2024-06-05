@@ -5,9 +5,13 @@ server:
 spring:
   data:
     mongodb:
-      user: szerszu
+      authentication-database: admin
+      host: localhost
+      port: 27017
+      database: swap
+      username: szerszu
       password: szerszu
-      uri: mongodb://localhost:27017/scans
+      uri: mongodb://szerszu:szerszu@localhost:27017/swap?authSource=admin
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER

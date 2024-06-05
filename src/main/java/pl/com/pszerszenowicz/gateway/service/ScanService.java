@@ -15,10 +15,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 import pl.com.pszerszenowicz.gateway.configuration.KafkaConfig;
 import pl.com.pszerszenowicz.gateway.configuration.RabbitMQConfig;
+import pl.com.pszerszenowicz.gateway.exceptions.VerificationErrorException;
+import pl.com.pszerszenowicz.gateway.mapper.ScanMapper;
+import pl.com.pszerszenowicz.gateway.model.Scan;
+import pl.com.pszerszenowicz.gateway.model.ScanStatus;
+import pl.com.pszerszenowicz.gateway.model.ScanType;
 import pl.com.pszerszenowicz.gateway.model.dto.ReceivedScan;
+import pl.com.pszerszenowicz.gateway.model.dto.ShowScan;
+import pl.com.pszerszenowicz.gateway.repository.ScanRepository;
 import pl.com.pszerszenowicz.model.ProductInfo;
 import pl.com.pszerszenowicz.model.VerificationStatus;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +39,53 @@ public class ScanService {
 
     RabbitTemplate rabbitTemplate;
     ReplyingKafkaTemplate<String, String, ProductInfo> replyingKafkaTemplate;
+    ScanRepository scanRepository;
+    ScanMapper scanMapper;
 
     public ResponseEntity<?> sendScan(ReceivedScan receivedScan) {
-        log.info("Received scan: {}", receivedScan);
         VerificationStatus verificationStatus = verifyProductInVerificationMS(receivedScan.getBarcode());
+        if(verificationStatus == VerificationStatus.verificationError){
+            throw new VerificationErrorException("Error at verification of product");
+        }
+        ScanStatus scanStatus = processScanStatus(verificationStatus, receivedScan.getScanType());
         ProductInfo productInfo = getProductInfoInProductMS(receivedScan.getBarcode());
+        Scan scan = createScan(receivedScan.getScanType(),
+                receivedScan.getDeviceId(),
+                receivedScan.getUserId(),
+                receivedScan.getBarcode(),
+                scanStatus,
+                productInfo);
+        scanRepository.save(scan);
+        return ResponseEntity.ok().body(scanMapper.ScanToShowScan(scan));
+    }
 
-        return ResponseEntity.ok().body(productInfo);
+    private Scan createScan(ScanType scanType, String deviceId, String userId, String barcode, ScanStatus scanStatus, ProductInfo productInfo) {
+        return Scan.builder()
+                .scanType(scanType)
+                .deviceId(deviceId)
+                .userId(userId)
+                .barcode(barcode)
+                .status(scanStatus)
+                .productInfo(productInfo)
+                .build();
+    }
+
+    private ScanStatus processScanStatus(VerificationStatus verificationStatus, ScanType scanType) {
+        return switch (verificationStatus) {
+            case ready -> ScanStatus.success;
+            case destroyed,
+                    sample,
+                    expired,
+                    released-> processNonReadyStatus(scanType);
+            default -> ScanStatus.failure;
+        };
+    }
+
+    private ScanStatus processNonReadyStatus(ScanType scanType) {
+        if (scanType == ScanType.Verify){
+            return ScanStatus.success;
+        }
+        return ScanStatus.failure;
     }
 
     private VerificationStatus verifyProductInVerificationMS(String barcode) {
@@ -82,5 +130,10 @@ public class ScanService {
             log.info("TimeoutException: {}", e.getMessage());
         }
         return returnProduct;
+    }
+
+
+    public List<ShowScan> getScansByBarcode(String barcode) {
+        return scanRepository.findByBarcode(barcode);
     }
 }

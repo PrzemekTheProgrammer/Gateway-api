@@ -4,24 +4,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import pl.com.pszerszenowicz.model.ProductInfo;
 
 import java.math.BigInteger;
 
-@Document
+@Document(collection = "scan")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Scan {
 
-    private ObjectId id;
+    @Id
+    private String id;
     private ScanType scanType;
-    private BigInteger deviceId;
-    private BigInteger userId;
+    private String deviceId;
+    private String userId;
     private String barcode;
     private ScanStatus status;
+    private ProductInfo productInfo;
 
 
 }
